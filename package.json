@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "Cricket Management & Live Scoring Platform - Technical Foundation",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",

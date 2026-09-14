@@ -12,13 +12,32 @@ import { logger } from './utils/logger.js';
 export const createApp = () => {
   const app = express();
 
+  // Trust Reverse Proxies (Nginx, Docker network, Cloudflare, Load Balancers)
+  app.set('trust proxy', 1);
+
   // Security Headers
   app.use(helmet());
 
   // CORS Configuration
   app.use(
     cors({
-      origin: config.cors.origin === '*' ? '*' : config.cors.origin.split(','),
+      origin: (requestOrigin, callback) => {
+        if (!requestOrigin) return callback(null, true);
+        if (config.cors.origin === '*') return callback(null, true);
+        const allowedOrigins = config.cors.origin.split(',').map((o) => o.trim());
+        if (allowedOrigins.includes(requestOrigin) || allowedOrigins.includes('*')) {
+          return callback(null, true);
+        }
+        // Match localhost, 127.0.0.1, or any vercel.app deployment
+        if (
+          /^https?:\/\/localhost(:\d+)?$/.test(requestOrigin) ||
+          /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(requestOrigin) ||
+          /^https:\/\/.*\.vercel\.app$/.test(requestOrigin)
+        ) {
+          return callback(null, true);
+        }
+        return callback(null, true);
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],

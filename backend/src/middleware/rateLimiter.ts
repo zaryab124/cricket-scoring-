@@ -6,6 +6,7 @@ export const apiRateLimiter = rateLimit({
   max: config.rateLimit.maxRequests,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: {
     success: false,
     error: {
@@ -20,6 +21,7 @@ export const authRateLimiter = rateLimit({
   max: 60, // 60 attempts per 15 mins for login/register
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: {
     success: false,
     error: {
@@ -34,6 +36,7 @@ export const searchRateLimiter = rateLimit({
   max: 120, // 120 search queries per minute
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: {
     success: false,
     error: {

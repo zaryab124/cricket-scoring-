@@ -3,7 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies
+# Install build dependencies & openssl for Prisma
+RUN apk add --no-cache openssl
+
 COPY package*.json ./
 COPY prisma ./prisma/
 
@@ -23,16 +25,16 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
+# Install runtime openssl for Prisma query engine
+RUN apk add --no-cache openssl
+
 ENV NODE_ENV=production
 ENV PORT=5000
 
-# Copy runtime files
+# Copy runtime dependencies and compiled output from builder
 COPY package*.json ./
 COPY prisma ./prisma/
-
-RUN npm ci --only=production
-RUN npx prisma generate
-
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
 # Create backups and database directories
